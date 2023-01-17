@@ -23,15 +23,22 @@ export default {
     }
 
     if (pathname === "/api/open_track") {
-		const { searchParams } = new URL(request.url)
-		let event_name = searchParams.get('event_name')
-		if (event_name === null) {
-			return new Response("You need to specify event_name parameter")			
-		} 
-		console.log('Record this open action ')
-		var event_stmt = env.DB.prepare('INSERT INTO track_events (event_name,event_time) VALUES (?, CURRENT_TIMESTAMP)').bind(event_name);
-		event_stmt.run();
-      return new Response();
+      const { searchParams } = new URL(request.url);
+      let event_name = searchParams.get("event_name");
+      let userid = searchParams.get("userid");
+      if (event_name === null) {
+        return new Response("You need to specify event_name parameter");
+      }
+      if (userid === null) {
+        return new Response("You need to specify userid parameter");
+      }
+
+      console.log("Record this open action ");
+      var event_stmt = env.DB.prepare(
+        "INSERT INTO track_events (userid,event_name,event_time) VALUES (?,?, CURRENT_TIMESTAMP)"
+      ).bind(userid, event_name);
+      event_stmt.run();
+      return new Response(`Recorded event named: ${event_name} for user with userid: ${userid}`);
     }
 
     return new Response("Call /api/events_tracked to see tracked events");
